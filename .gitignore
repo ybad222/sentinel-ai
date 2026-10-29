@@ -1,0 +1,10 @@
+# Lab notebooks: never commit
+guide*.md
+# Python / env
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.pytest_cache/
+.ruff_cache/
+.coverage
