@@ -35,6 +35,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 addopts = "-q -m 'not llm'"
 markers = ["llm: needs a running LLM (run with: pytest -m llm)"]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.bandit]
 exclude_dirs = ["tests"]

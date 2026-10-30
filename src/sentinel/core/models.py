@@ -36,6 +36,7 @@ class Verdict(StrEnum):
 
 class ObservableType(StrEnum):
     IPV4 = "ipv4"
+    IPV6 = "ipv6"
     DOMAIN = "domain"
     URL = "url"
     SHA256 = "sha256"
