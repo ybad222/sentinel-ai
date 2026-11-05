@@ -5,8 +5,10 @@ description = "Agentic AI assistant for SOC alert triage — human-in-the-loop a
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "faker>=40.44.0",
     "pydantic>=2.14.2",
     "pydantic-settings>=2.16.2",
+    "pyyaml>=6.0.3",
     "structlog>=26.1.0",
 ]
 
